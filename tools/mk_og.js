@@ -30,6 +30,9 @@ const PAGES = [
     motto: '&ldquo;The sacrament costs nothing.&rdquo;' },
   { file: 'contact',    palette: 'chiaroscuro', seed: 5501,
     headline: 'Begin an <em>enquiry.</em>' },
+  { file: 'privacy',    palette: 'chiaroscuro', seed: 9001,
+    headline: 'What we do with <em>what you tell us.</em>',
+    sub: 'Privacy' },
 ];
 
 (async () => {

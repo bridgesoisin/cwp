@@ -42,6 +42,10 @@ PAGES = [
     dict(file="contact.html", nav="contact.html", title="Contact",
          desc="Begin an enquiry with Ad Altare. Tell us your date, your church "
               "and your guest count, and we will write back within two working days."),
+    dict(file="privacy.html", nav="privacy.html", title="Privacy",
+         desc="What Ad Altare does with the details you send through the "
+              "enquiry form: why we hold them, for how long, who else sees "
+              "them, and how to have them deleted."),
 ]
 
 TOKENS = {

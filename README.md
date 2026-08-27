@@ -53,6 +53,35 @@ the `.woff2` files into `assets/fonts/`, replace the `<link>` in each page's
 
 ---
 
+## Launch checklist
+
+Work top to bottom. Nothing below is optional except where it says so.
+
+- [ ] **Set your real domain.** `SITE_URL` in `tools/chrome.py`, then
+      `python3 tools/build.py && python3 tools/mk_meta.py`. Canonical tags, the
+      sitemap and every share-image URL derive from it.
+- [ ] **Custom domain on GitHub Pages** — add a `CNAME` file containing just the
+      domain (e.g. `adaltare.ie`), point a DNS `ALIAS`/`ANAME` at
+      `bridgesoisin.github.io`, and enable *Enforce HTTPS* in Settings → Pages.
+      Not created here, because a `CNAME` naming the wrong domain breaks the
+      site rather than doing nothing.
+- [ ] **Replace every placeholder** in the table below.
+- [ ] **Point the enquiry form at a real endpoint** — see below. Test it by
+      sending yourself an enquiry.
+- [ ] **Check the retention periods** in `privacy.html` say what you actually do.
+- [ ] **Have a priest read `rite.html`**, particularly the preparation section
+      and what it says about permissions for the older rite.
+- [ ] **Check the figures on `budget.html`** against current Irish prices.
+- [ ] **Add real photography** to `assets/images/` — see below.
+- [ ] **Re-render the share images** if you changed any page title:
+      `node tools/mk_og.js`.
+- [ ] Submit `sitemap.xml` in Google Search Console.
+- [ ] Paste the URL into WhatsApp and confirm the share card looks right.
+
+`.nojekyll` is already present: it stops GitHub Pages running the site through
+Jekyll, which is faster and avoids surprises with any future underscore-prefixed
+file.
+
 ## Before you launch: placeholder content
 
 **Everything in the list below is invented.** It is written to be plausible so
@@ -67,6 +96,7 @@ of it should go live unchanged. Search for each string and replace it.
 | Canonical URL | `<link rel="canonical">` in each `<head>` | `https://adaltare.ie/…` |
 | Studio location | `contact.html`, footer | "Dublin 2 & Galway City" |
 | Social links | footer | point at instagram.com / pinterest.ie — swap in your real profile URLs |
+| Data retention periods | `privacy.html` | twelve months / six years — change to what you actually do |
 | Staff names and biographies | `philosophy.html` | three invented people |
 | Company history | `philosophy.html` timeline | invented |
 | Statistics (184 weddings, 21 dioceses, 12 years, 6 countries) | `index.html`, `weddings.html` | invented — see `data-count` |
@@ -212,6 +242,7 @@ Six pages, all plain HTML:
 | `weddings.html` | Portfolio, with filters |
 | `budget.html` | What a wedding costs, twelve ways to spend less, and a countdown |
 | `contact.html` | Enquiry form and FAQ |
+| `privacy.html` | What happens to enquiry data — GDPR notice |
 
 **The header, mobile menu and footer are duplicated in all six files.** That is
 the deliberate cost of having no build step: the pages are real HTML that renders

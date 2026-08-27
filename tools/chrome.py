@@ -344,7 +344,7 @@ FOOTER = """
 
       <div class="footer__bar">
         <span>&copy; <span data-year>2026</span> {brand}. Dublin &amp; Galway, Ireland.</span>
-        <span>{motto_en}.</span>
+        <span><a href="privacy.html">Privacy</a> &middot; {motto_en}.</span>
       </div>
     </div>
   </footer>"""
