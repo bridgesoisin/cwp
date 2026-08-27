@@ -1,0 +1,260 @@
+  <!-- ================================================ PAGE HERO ===== -->
+  <section class="page-hero">
+    <div class="page-hero__canvas" aria-hidden="true">
+      <canvas data-fresco='{"preset":"ground","palette":"chiaroscuro","seed":5501,"lightX":0.5}'></canvas>
+    </div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <div class="shell shell--wide page-hero__inner">
+      <p class="eyebrow" data-reveal="up">Contact</p>
+      <h1 class="page-hero__title display" data-reveal="split">
+        <span data-split="mask">Begin</span>
+        <span data-split="mask" data-split-delay="140">an <em class="serif-italic gilded">enquiry.</em></span>
+      </h1>
+      <p class="lead measure-wide" data-reveal="up" data-reveal-delay="360">
+        Tell us the date, the church if you have one, and how many people you
+        love enough to feed. We read every enquiry ourselves and reply within
+        two working days.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================================================== ENQUIRY ===== -->
+  <section class="section" id="enquiry">
+    <div class="shell shell--wide">
+      <div class="contact-grid">
+
+        <div data-reveal="up">
+          <p class="eyebrow eyebrow--bare">Direct</p>
+          <dl>
+            <div class="contact-detail">
+              <dt>Email</dt>
+              <dd><a href="mailto:{{email}}">{{email}}</a></dd>
+            </div>
+            <div class="contact-detail">
+              <dt>Telephone</dt>
+              <dd><a href="tel:{{phone_href}}">{{phone}}</a></dd>
+            </div>
+            <div class="contact-detail">
+              <dt>Studio</dt>
+              <dd>By appointment<br>Dublin 2 &amp; Galway City</dd>
+            </div>
+            <div class="contact-detail">
+              <dt>Consultations</dt>
+              <dd>Tuesday to Friday<br>10.00 &ndash; 18.00</dd>
+            </div>
+          </dl>
+
+          <p class="prose" style="margin-top:2.5rem;font-size:.92rem">
+            We take a limited number of weddings each year. If your date is
+            already taken we will say so straight away, and where we can we
+            will point you to another house we trust.
+          </p>
+
+          <p class="latin" style="margin-top:2.5rem">&ldquo;{{motto_la}}.&rdquo;</p>
+        </div>
+
+        <div data-reveal="up" data-reveal-delay="140">
+          <p class="eyebrow eyebrow--bare">The form</p>
+
+          <!-- To receive enquiries by HTTP, set action="" to your endpoint
+               (Formspree, Netlify Forms, your own handler). While action="#"
+               the script composes the enquiry as an email instead. -->
+          <form class="grid grid--2" data-form="{{email}}" action="#" method="post" novalidate>
+            <div class="field" style="grid-column:1/-1">
+              <label for="f-names">Your names</label>
+              <input id="f-names" name="names" type="text" required
+                     placeholder="&Aacute;ine and Cathal" autocomplete="name">
+            </div>
+
+            <div class="field">
+              <label for="f-email">Email</label>
+              <input id="f-email" name="email" type="email" required
+                     placeholder="you@example.ie" autocomplete="email">
+            </div>
+
+            <div class="field">
+              <label for="f-phone">Telephone <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+              <input id="f-phone" name="telephone" type="tel"
+                     placeholder="+353&nbsp;&hellip;" autocomplete="tel">
+            </div>
+
+            <div class="field">
+              <label for="f-date">Wedding date, or roughly when</label>
+              <input id="f-date" name="date" type="text" placeholder="14 September 2027, or &lsquo;autumn 2027&rsquo;">
+            </div>
+
+            <div class="field">
+              <label for="f-guests">Guests</label>
+              <input id="f-guests" name="guests" type="text" placeholder="120">
+            </div>
+
+            <div class="field" style="grid-column:1/-1">
+              <label for="f-church">Church, parish or diocese <span style="text-transform:none;letter-spacing:0">(if you know it)</span></label>
+              <input id="f-church" name="church" type="text" placeholder="St Colman&rsquo;s Cathedral, Cobh">
+            </div>
+
+            <div class="field field--select" style="grid-column:1/-1">
+              <label for="f-form">Which form of the rite?</label>
+              <select id="f-form" name="rite">
+                <option value="">Not sure yet &mdash; talk us through it</option>
+                <option>Nuptial Mass &mdash; Order of Celebrating Matrimony</option>
+                <option>Marriage outside Mass</option>
+                <option>Traditional Latin Mass &mdash; Missa pro Sponso et Sponsa</option>
+              </select>
+            </div>
+
+            <div class="field field--select" style="grid-column:1/-1">
+              <label for="f-collection">Which collection are you considering?</label>
+              <select id="f-collection" name="collection">
+                <option value="">Not sure yet &mdash; advise us</option>
+                <option>The Nuptial Mass &mdash; liturgy only</option>
+                <option>A Traditional Latin nuptial Mass</option>
+                <option>The Full Atelier</option>
+                <option>Direction only</option>
+                <option>A convalidation</option>
+                <option>A destination wedding</option>
+              </select>
+            </div>
+
+            <div class="field" style="grid-column:1/-1">
+              <label for="f-message">Tell us about the wedding you have in mind</label>
+              <textarea id="f-message" name="message" rows="5"
+                        placeholder="Anything at all &mdash; the church, the families, what you are worried about."></textarea>
+            </div>
+
+            <div style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center">
+              <button class="btn btn--solid btn--lg" type="submit" data-magnetic="0.24">
+                Send enquiry {{icon:arrow}}
+              </button>
+              <p class="form-note" style="margin:0;flex:1 1 16rem">
+                We will only ever use these details to answer you.
+              </p>
+            </div>
+
+            <div class="form-status" data-form-status hidden style="grid-column:1/-1"></div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="ornament-divider" aria-hidden="true">{{icon:diamond}}</div>
+
+  <!-- ====================================================== FAQ ===== -->
+  <section class="section on-parchment" id="faq" aria-labelledby="faq-title">
+    <div class="shell shell--narrow">
+      <p class="eyebrow" data-reveal="up">Questions</p>
+      <h2 class="h2" id="faq-title" style="margin-bottom:clamp(2rem,5vw,3rem)" data-reveal="split">
+        <span data-split="mask">Asked before you ask them</span>
+      </h2>
+
+      <div class="accordion" data-accordion data-reveal="up">
+        <div class="accordion__item">
+          <button class="accordion__trigger" type="button" aria-expanded="false">
+            How far ahead should we get in touch?
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion__panel"><div><div class="accordion__body">
+            <p>Twelve to eighteen months is comfortable. We have taken weddings at
+              five months and made them work, and we have turned down weddings at
+              two years because the date was gone. Ask early; it costs nothing.</p>
+          </div></div></div>
+        </div>
+
+        <div class="accordion__item">
+          <button class="accordion__trigger" type="button" aria-expanded="false">
+            Do you only work with Catholic couples?
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion__panel"><div><div class="accordion__body">
+            <p>We plan Catholic weddings, which by definition means at least one of
+              you is Catholic. A great many of our couples are a Catholic and
+              somebody who is not &mdash; a Church of Ireland partner, a Muslim
+              partner, an atheist partner. That is ordinary, the Church has
+              provided for it carefully, and we are good at it.</p>
+          </div></div></div>
+        </div>
+
+        <div class="accordion__item">
+          <button class="accordion__trigger" type="button" aria-expanded="false">
+            We have not been to Mass in years. Is that a problem?
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion__panel"><div><div class="accordion__body">
+            <p>No, and you would be in the large majority. Nobody here is going to
+              examine you. What we will do is make sure that the rite you are
+              standing inside is explained to you, so that you are not simply
+              following instructions on the day.</p>
+          </div></div></div>
+        </div>
+
+        <div class="accordion__item">
+          <button class="accordion__trigger" type="button" aria-expanded="false">
+            Do you take a commission from suppliers?
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion__panel"><div><div class="accordion__body">
+            <p>Never. Not from venues, florists, photographers, musicians or anyone
+              else. We are paid by you, which is the only way our recommendation
+              is worth anything.</p>
+          </div></div></div>
+        </div>
+
+        <div class="accordion__item">
+          <button class="accordion__trigger" type="button" aria-expanded="false">
+            Will you work outside Ireland?
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion__panel"><div><div class="accordion__body">
+            <p>Three or four times a year. Rome and Italy most often, and the Irish
+              chaplaincies in Britain. Travel and accommodation are charged at cost
+              on top of the fee, itemised in advance.</p>
+          </div></div></div>
+        </div>
+
+        <div class="accordion__item">
+          <button class="accordion__trigger" type="button" aria-expanded="false">
+            Can you take over a wedding already in progress?
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion__panel"><div><div class="accordion__body">
+            <p>Yes &mdash; that is what Direction Only is for. We take handover eight
+              weeks out, contact every supplier, review the liturgy against the
+              rite and the parish policy, and run it from there. It is a common
+              and entirely sensible thing to ask for.</p>
+          </div></div></div>
+        </div>
+
+        <div class="accordion__item">
+          <button class="accordion__trigger" type="button" aria-expanded="false">
+            What happens at the first meeting?
+            <span class="accordion__icon" aria-hidden="true"></span>
+          </button>
+          <div class="accordion__panel"><div><div class="accordion__body">
+            <p>An hour of questions, most of them ours. Bring the date if you have
+              one, the church if you have one, and an honest number for the budget.
+              You will leave with a clear sense of what your wedding will need,
+              whether or not you engage us. There is no charge.</p>
+          </div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================== CTA ===== -->
+  <section class="cta">
+    <div class="cta__canvas" aria-hidden="true">
+      <canvas data-fresco='{"preset":"veil","palette":"chiaroscuro","seed":1717}'></canvas>
+    </div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="shell shell--narrow">
+      <p class="latin" style="font-size:clamp(1.2rem,2.4vw,2rem)" data-reveal="up">
+        &ldquo;{{motto_la}}.&rdquo;
+      </p>
+      <p class="micro" style="color:var(--fg-faint);margin-top:1rem" data-reveal="up" data-reveal-delay="120">
+        {{motto_en}} &middot; Psalm 42
+      </p>
+    </div>
+  </section>

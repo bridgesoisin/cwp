@@ -1,0 +1,5 @@
+# Ad Altare — Catholic Wedding Atelier
+User-agent: *
+Allow: /
+
+Sitemap: https://adaltare.ie/sitemap.xml

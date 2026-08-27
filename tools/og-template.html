@@ -1,0 +1,80 @@
+<!doctype html><meta charset="utf-8">
+<link rel="stylesheet" href="/assets/css/style.css">
+<style>
+  html, body { margin: 0; background: #0f0c09; }
+  .card {
+    position: relative; width: 1200px; height: 630px;
+    overflow: hidden; isolation: isolate;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 72px 80px;
+    font-family: var(--font-ui);
+  }
+  .card canvas.ground { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
+  .card .rose { position: absolute; z-index: -1; top: 50%; right: -140px;
+                width: 720px; height: 720px; transform: translateY(-50%); opacity: .32;
+                mix-blend-mode: screen; }
+  .card .rose canvas { width: 100%; height: 100%; }
+  .card .vig { position: absolute; inset: 0; z-index: -1;
+               background: radial-gradient(120% 100% at 30% 40%, transparent 30%, rgba(6,4,2,.72) 100%); }
+  .row { display: flex; align-items: center; gap: 18px; }
+  .mark { width: 40px; height: 40px; color: #c9a253; }
+  .wordmark { font-family: var(--font-display); font-size: 40px; font-weight: 400;
+              letter-spacing: .34em; text-indent: .34em; color: #f2ebdd; line-height: 1; }
+  .sub { font-size: 13px; letter-spacing: .3em; text-transform: uppercase;
+         color: rgba(242,235,221,.62); margin-top: 10px; text-indent: .3em; }
+  h1 { font-family: var(--font-display); font-weight: 300; color: #f2ebdd;
+       font-size: 88px; line-height: 1.02; letter-spacing: -.015em; margin: 0;
+       max-width: 15ch; text-wrap: balance; }
+  h1 em { font-style: italic;
+          background-image: linear-gradient(96deg,#7c5c22,#e6c983 34%,#b9913f 58%,#e6c983 86%);
+          -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
+  .motto { font-family: var(--font-display); font-style: italic; font-size: 26px;
+           color: #c9a253; }
+  .site { font-size: 13px; letter-spacing: .24em; text-transform: uppercase;
+          color: rgba(242,235,221,.62); }
+  .rule { height: 1px; background: linear-gradient(90deg, rgba(201,162,83,.55), transparent);
+          margin-bottom: 28px; }
+</style>
+<div class="card" id="card">
+  <canvas class="ground" id="ground"></canvas>
+  <div class="rose"><canvas id="rose"></canvas></div>
+  <div class="vig"></div>
+
+  <div class="row">
+    <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" width="40" height="40">
+      <path d="M12 2.6v18.8M3.4 10.4h17.2"/>
+      <path d="M10.3 3.7a1.7 1.7 0 0 1 3.4 0M10.3 20.3a1.7 1.7 0 0 0 3.4 0M4.5 8.8a1.7 1.7 0 0 0 0 3.2M19.5 8.8a1.7 1.7 0 0 1 0 3.2"/></svg></span>
+    <span>
+      <span class="wordmark">AD ALTARE</span>
+      <span class="sub" id="sub">Catholic Wedding Atelier &middot; Ireland</span>
+    </span>
+  </div>
+
+  <h1 id="headline">Sacred weddings, <em>beautifully made.</em></h1>
+
+  <div>
+    <div class="rule"></div>
+    <div class="foot">
+      <span class="motto" id="motto">&ldquo;Introibo ad altare Dei.&rdquo;</span>
+      <span class="site">adaltare.ie</span>
+    </div>
+  </div>
+</div>
+<script src="/assets/js/canvas-art.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get('headline')) document.getElementById('headline').innerHTML = q.get('headline');
+  if (q.get('sub')) document.getElementById('sub').innerHTML = q.get('sub');
+  if (q.get('motto')) document.getElementById('motto').innerHTML = q.get('motto');
+  const art = AltareArt.fresco(document.getElementById('ground'), {
+    preset: 'ground', palette: q.get('palette') || 'chiaroscuro',
+    seed: +(q.get('seed') || 417), lightX: 0.34, still: true, resolution: 320
+  });
+  art.paint();
+  AltareArt.roseWindow(document.getElementById('rose'), { petals: 12, inner: 6 });
+  // signal readiness once the plate has actually landed
+  const done = () => document.getElementById('ground').classList.contains('is-painted');
+  window.__ogReady = done;
+</script>
