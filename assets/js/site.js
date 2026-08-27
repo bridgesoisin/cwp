@@ -386,9 +386,13 @@
       });
     }
 
-    function init() {
+    function refresh() {
       items = qsa('[data-split]');
       items.forEach(build);
+    }
+
+    function init() {
+      refresh();
 
       var relayout = debounce(function () {
         items.forEach(function (el) {
@@ -408,7 +412,7 @@
       }
     }
 
-    return { init: init };
+    return { init: init, refresh: refresh };
   })();
 
   /* ====================================================================== *
@@ -999,5 +1003,18 @@
   var onPrefChange = function () { window.location.reload(); };
   if (mqReduced.addEventListener) mqReduced.addEventListener('change', onPrefChange);
 
-  window.Altare = { Scroller: Scroller, ScrollFX: ScrollFX };
+  /* Public API. `refresh()` re-reads the document — call it after swapping
+     content in (client-side navigation, a CMS render, injected markup) and
+     the splits, entrances, parallax, pins and generated artwork all pick the
+     new nodes up. */
+  window.Altare = {
+    Scroller: Scroller,
+    ScrollFX: ScrollFX,
+    refresh: function () {
+      if (window.AltareArt) window.AltareArt.mount();
+      Split.refresh();
+      ScrollFX.refresh();
+      Reveal.init();
+    }
+  };
 })();
