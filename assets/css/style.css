@@ -49,6 +49,14 @@
   --gilt: linear-gradient(96deg, var(--gold-deep) 0%, var(--gold-light) 34%,
                           var(--gold) 58%, var(--gold-light) 86%);
 
+  /* Chart marks. Stepped per surface so every bar clears 3:1 against the
+     ground it sits on — the floor for a graphical object. Measured values on
+     ink: 3.88 and 8.15; the protected variant 6.67 and 12.12. */
+  --bar-from: #8a6a2e;
+  --bar-to: #c9a253;
+  --bar-keep-from: #b9913f;
+  --bar-keep-to: #e6c983;
+
   /* --- Type --- */
   --font-display: "Cormorant Garamond", "EB Garamond", Garamond, "Times New Roman", serif;
   --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -100,6 +108,12 @@
   --fg-faint: color-mix(in srgb, var(--ink) 58%, transparent);
   --rule: color-mix(in srgb, var(--ink) 16%, transparent);
   --accent: var(--gold-deep);
+  /* On parchment the same marks must step the other way: 6.21 and 3.38,
+     protected 9.59 and 6.21. */
+  --bar-from: #6b5220;
+  --bar-to: #9c7a2e;
+  --bar-keep-from: #4a3712;
+  --bar-keep-to: #6b5220;
   background: var(--bg);
   color: var(--fg);
 }
@@ -1551,4 +1565,177 @@ body.menu-open .menu__link { transform: translateY(0); }
   .pin__counter { display: none; }
   .hero__aside { text-align: left; }
   .stack-card { background-color: transparent; }
+}
+
+/* ==========================================================================
+   15  THE BUDGET GUIDE — cost chart and hand-off list
+   ========================================================================== */
+
+/* The chart and its table view are the same object: a semantic table whose
+   last column carries the mark. Nothing is encoded by colour alone — every
+   value is printed beside its bar. */
+.chart { margin: 0; }
+
+.costs {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.costs__caption {
+  caption-side: top;
+  text-align: left;
+  color: var(--fg-dim);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  max-width: 62ch;
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+.costs__caption strong { color: var(--fg); font-weight: 500; }
+
+.costs thead th {
+  font-family: var(--font-ui);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: var(--ls-micro);
+  text-transform: uppercase;
+  color: var(--fg-faint);
+  text-align: left;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rule);
+}
+.costs tbody th,
+.costs tfoot th {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  text-align: left;
+  padding: 0.85rem 1.5rem 0.85rem 0;
+  white-space: nowrap;
+}
+.costs td { padding: 0.85rem 0; border-bottom: 1px solid var(--rule); }
+.costs tbody th { border-bottom: 1px solid var(--rule); }
+
+.costs__num {
+  text-align: right;
+  padding-right: clamp(1rem, 2.5vw, 2.5rem) !important;
+  color: var(--fg-dim);
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+.costs thead .costs__num { text-align: right; }
+.costs tbody td.costs__num:last-of-type { color: var(--fg); }
+
+.costs__plot { width: 42%; min-width: 8rem; }
+
+.costs tfoot th,
+.costs tfoot td {
+  padding-top: 1.35rem;
+  border-bottom: 0;
+  color: var(--fg);
+  font-weight: 400;
+}
+.costs tfoot .costs__num { color: var(--accent); font-size: 1.05rem; }
+
+/* The mark: a range spanning lean → comfortable, anchored on a shared scale.
+   Rounded data-ends, a recessive track, and no fill between rows. */
+.bar {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+.bar::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: var(--from);
+  right: calc(100% - var(--to));
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--bar-from), var(--bar-to));
+  box-shadow: 0 0 0 2px var(--bg);
+}
+/* The lines we would protect are marked by shape as well as tone, so the
+   distinction survives greyscale, print and colour-blindness. */
+.bar--keep::after {
+  background: linear-gradient(90deg, var(--bar-keep-from), var(--bar-keep-to));
+}
+.bar--keep::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--to) + 0.5rem);
+  top: 50%;
+  width: 5px; height: 5px;
+  margin-top: -2.5px;
+  transform: rotate(45deg);
+  background: var(--bar-keep-to);
+}
+.bar--swatch {
+  display: inline-block;
+  width: 1.75rem; height: 8px;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  background: none;
+}
+.bar--swatch::after { left: 0; right: 0; box-shadow: none; }
+.bar--swatch::before { display: none; }
+
+.chart__note {
+  margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: var(--fs-small);
+  color: var(--fg-faint);
+  line-height: 1.65;
+  max-width: 76ch;
+}
+.chart__key {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent);
+  margin-right: 0.35rem;
+}
+
+/* --- Hand-off checklist ------------------------------------------------- */
+.handoff { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.handoff li {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  padding-block: clamp(0.9rem, 1.8vw, 1.25rem);
+  border-bottom: 1px solid var(--rule);
+  color: var(--fg-dim);
+  font-size: 0.98rem;
+}
+.handoff li b { color: var(--fg); font-weight: 500; }
+.handoff svg { width: 0.85rem; height: 0.85rem; color: var(--accent); margin-top: 0.35rem; }
+
+@media (max-width: 860px) {
+  /* The table reflows to stacked rows; the mark keeps its full width. */
+  .costs thead { display: none; }
+  .costs tbody tr, .costs tfoot tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.35rem 1rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .costs tbody th, .costs tfoot th {
+    grid-column: 1 / -1;
+    padding: 0 0 0.35rem;
+    border-bottom: 0;
+    white-space: normal;
+  }
+  .costs td { border-bottom: 0; padding: 0; }
+  .costs__num { padding-right: 0 !important; }
+  .costs__num::before {
+    content: attr(data-label) " ";
+    font-family: var(--font-ui);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+  .costs__plot { grid-column: 1 / -1; width: auto; margin-top: 0.6rem; }
 }

@@ -73,6 +73,8 @@ of it should go live unchanged. Search for each string and replace it.
 | Every testimonial | `index.html`, `weddings.html` | invented, including the priest and the sacristan |
 | Every couple and wedding in the portfolio | `weddings.html`, `index.html` | invented couples. **The churches are real buildings; the weddings are not.** Three are tagged `tlm` and shown as traditional-rite weddings |
 | Prices (€2,400 / €9,800 / €3,600 and the add-ons) | `atelier.html` | invented |
+| Every figure in the cost table and the twelve levers | `budget.html` | **indicative Irish figures, not quotations** — check them against current local prices before launch |
+| Irish terminology — the green book, corkage practice, the marriage course | `budget.html`, `rite.html` | written as the source guide has it; outbound network was blocked, so nothing could be checked against a current source |
 | Dioceses served | `philosophy.html` | real Irish dioceses, but not a claim we can stand over |
 
 The liturgical content on `rite.html` — both orders of the rite, the readings,
@@ -120,6 +122,25 @@ filter buttons) and the `seed` in `data-fresco` so it gets its own artwork.
 
 ---
 
+## The budget guide
+
+`budget.html` is built from a real month-by-month planner the owners wrote for
+a friend. Two things were deliberately left out of the published version:
+
+- **Every personal name.** The source names the couple, the friend it was
+  written for, and family members. None of it is on the site.
+- **The photographer recommendation.** The source names a real working
+  photographer. Recommending a named business on a commercial page is the
+  owners' call to make with that person — add it back if you have their
+  agreement.
+
+The cost table is a semantic `<table>` whose last column carries the bar, so the
+chart and its accessible table view are the same object; every value is printed
+beside its mark, and the "would not economise on" rows are marked by a diamond
+as well as by tone, so the distinction survives greyscale and colour-blindness.
+Bar colours are stepped per surface (`--bar-from` / `--bar-to`, redefined under
+`.on-parchment`) so each clears 3:1 against the ground it sits on.
+
 ## Wiring up the enquiry form
 
 The form on `contact.html` currently has `action="#"`. In that state the script
@@ -155,6 +176,7 @@ Six pages, all plain HTML:
 | `rite.html` | Both rites — the Order of Celebrating Matrimony and the Traditional Latin nuptial Mass — plus readings, music, paperwork |
 | `atelier.html` | Collections, investment, the eight-step process |
 | `weddings.html` | Portfolio, with filters |
+| `budget.html` | What a wedding costs, twelve ways to spend less, and a countdown |
 | `contact.html` | Enquiry form and FAQ |
 
 **The header, mobile menu and footer are duplicated in all six files.** That is
