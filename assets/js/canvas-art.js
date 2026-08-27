@@ -18,6 +18,14 @@
     ? global.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false;
 
+  /* Painting a plate is tens of thousands of noise evaluations. Run it in
+     idle time so it never lands inside a frame the browser is trying to
+     present, but cap the wait so an above-the-fold panel is not left
+     blank while the main thread is busy. */
+  var idle = global.requestIdleCallback
+    ? function (fn) { return global.requestIdleCallback(fn, { timeout: 320 }); }
+    : function (fn) { return setTimeout(fn, 1); };
+
   /* ------------------------------------------------------------------ *
    * Value noise
    * ------------------------------------------------------------------ */
@@ -123,7 +131,10 @@
    * generated and cross-drifted so the surface never sits still.
    * ------------------------------------------------------------------ */
 
-  function paintPlate(w, h, opts) {
+  /* A plate is painted a band of rows at a time. Doing it in one pass is a
+     quarter-second of synchronous work, which blocks input and drops frames;
+     the painter below yields between bands so no single task runs long. */
+  function makePainter(w, h, opts) {
     var cv = document.createElement('canvas');
     cv.width = w; cv.height = h;
     var ctx = cv.getContext('2d');
@@ -140,11 +151,14 @@
     var reach = opts.reach;
     var contrast = opts.contrast;
     var octaves = opts.octaves;
+    var aspect = h / w;
 
-    for (var y = 0; y < h; y++) {
+    var y = 0;
+
+    function row(yy) {
       for (var x = 0; x < w; x++) {
         var nx = (x / w) * scale;
-        var ny = (y / h) * scale * (h / w);
+        var ny = (yy / h) * scale * aspect;
 
         /* Domain warp — the drift of a brush loaded with medium. */
         var wx = fbm(nx + 5.2, ny + 1.3, seed, 3);
@@ -157,7 +171,7 @@
 
         /* The light source — a single high window, as in any Caravaggio. */
         var dx = (x / w - lx);
-        var dy = (y / h - ly) * (h / w) * 1.7;
+        var dy = (yy / h - ly) * aspect * 1.7;
         var dist = Math.sqrt(dx * dx + dy * dy) / reach;
         var lum = dist >= 1 ? 0 : (1 - dist) * (1 - dist);
 
@@ -170,12 +184,37 @@
         v += (fbm(nx * 7.5, ny * 7.5, seed + 313, 2) - 0.5) * 0.06;
 
         var c = ramp(stops, v);
-        var i = (y * w + x) * 4;
+        var i = (yy * w + x) * 4;
         data[i] = c[0]; data[i + 1] = c[1]; data[i + 2] = c[2]; data[i + 3] = 255;
       }
     }
-    ctx.putImageData(img, 0, 0);
-    return cv;
+
+    return {
+      canvas: cv,
+      step: function (rows) {
+        var stop = Math.min(h, y + rows);
+        for (; y < stop; y++) row(y);
+        return y >= h;
+      },
+      commit: function () { ctx.putImageData(img, 0, 0); }
+    };
+  }
+
+  /* Work through a queue of painters, spending at most `budget` ms per frame
+     and handing the thread back in between. */
+  function paintQueue(painters, budget, onDone) {
+    function slice() {
+      var t0 = (global.performance || Date).now();
+      while (painters.length && (global.performance || Date).now() - t0 < budget) {
+        if (painters[0].step(6)) {
+          painters[0].commit();
+          painters.shift();
+        }
+      }
+      if (painters.length) global.requestAnimationFrame(slice);
+      else onDone();
+    }
+    global.requestAnimationFrame(slice);
   }
 
   /* Named looks. Markup asks for one by name and overrides what it likes:
@@ -208,7 +247,7 @@
       glow: 0.55,        /* how much the light lifts the value */
       reach: 0.85,       /* how far the light carries */
       contrast: 1.18,
-      resolution: 300,
+      resolution: 250,
       drift: 0.55,
       still: false
     }, preset, options);
@@ -216,19 +255,36 @@
     var ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    var W = opts.resolution;
-    var H = Math.round(W * 0.68);
-    var plateA = paintPlate(W, H, opts);
-    var plateB = paintPlate(W, H, Object.assign({}, opts, {
-      seed: opts.seed + 617,
-      scale: opts.scale * 1.45,
-      lightX: 1 - opts.lightX,
-      level: 0.5,              /* overlay is neutral at 0.5 — see draw() */
-      detail: opts.detail * 0.7,
-      glow: opts.glow * 0.45
-    }));
+    var plateA = null, plateB = null;
+    var raf = 0, t = 0, visible = false, prepared = false, pending = false;
 
-    var raf = 0, t = 0, visible = true;
+    /* Both plates are built on demand, the first time this canvas comes near
+       the viewport, and painted in slices. A panel nobody scrolls to is
+       never painted at all. */
+    function prepare(onReady) {
+      var W = opts.resolution;
+      var H = Math.round(W * 0.68);
+      var a = makePainter(W, H, opts);
+
+      /* The second plate is composited as a blurred overlay, so it carries
+         no detail worth paying full resolution for. */
+      var W2 = Math.max(64, Math.round(W * 0.65));
+      var b = makePainter(W2, Math.round(W2 * 0.68), Object.assign({}, opts, {
+        seed: opts.seed + 617,
+        scale: opts.scale * 1.45,
+        lightX: 1 - opts.lightX,
+        level: 0.5,              /* overlay is neutral at 0.5 — see draw() */
+        detail: opts.detail * 0.7,
+        glow: opts.glow * 0.45
+      }));
+
+      paintQueue([a, b], 7, function () {
+        plateA = a.canvas;
+        plateB = b.canvas;
+        prepared = true;
+        onReady();
+      });
+    }
 
     function size() {
       var r = canvas.getBoundingClientRect();
@@ -242,7 +298,7 @@
 
     function draw() {
       var w = canvas.width, h = canvas.height;
-      if (!w || !h) return;
+      if (!w || !h || !prepared) return;
       ctx.clearRect(0, 0, w, h);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
@@ -270,16 +326,27 @@
       draw();
     }
 
-    size();
-    draw();
+    function activate() {
+      if (prepared || pending) return;
+      pending = true;
+      idle(function () {
+        prepare(function () {
+          size();
+          draw();
+          canvas.classList.add('is-painted');
+          if (!reduced && !opts.still && !raf) raf = global.requestAnimationFrame(loop);
+        });
+      });
+    }
 
-    if (!reduced && !opts.still) {
-      raf = global.requestAnimationFrame(loop);
-      if ('IntersectionObserver' in global) {
-        new IntersectionObserver(function (entries) {
-          visible = entries[0].isIntersecting;
-        }, { rootMargin: '120px' }).observe(canvas);
-      }
+    if ('IntersectionObserver' in global) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (entries[0].isIntersecting) activate();
+      }, { rootMargin: '400px' }).observe(canvas);
+    } else {
+      visible = true;
+      activate();
     }
 
     var resizeTimer;
@@ -288,7 +355,10 @@
       resizeTimer = setTimeout(function () { size(); draw(); }, 180);
     }, { passive: true });
 
-    return { destroy: function () { global.cancelAnimationFrame(raf); } };
+    return {
+      destroy: function () { global.cancelAnimationFrame(raf); },
+      paint: activate
+    };
   }
 
   /* ------------------------------------------------------------------ *

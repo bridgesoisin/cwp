@@ -71,14 +71,18 @@ of it should go live unchanged. Search for each string and replace it.
 | Company history | `philosophy.html` timeline | invented |
 | Statistics (184 weddings, 21 dioceses, 12 years, 6 countries) | `index.html`, `weddings.html` | invented — see `data-count` |
 | Every testimonial | `index.html`, `weddings.html` | invented, including the priest and the sacristan |
-| Every couple and wedding in the portfolio | `weddings.html`, `index.html` | invented couples. **The churches are real buildings; the weddings are not.** |
+| Every couple and wedding in the portfolio | `weddings.html`, `index.html` | invented couples. **The churches are real buildings; the weddings are not.** Three are tagged `tlm` and shown as traditional-rite weddings |
 | Prices (€2,400 / €9,800 / €3,600 and the add-ons) | `atelier.html` | invented |
 | Dioceses served | `philosophy.html` | real Irish dioceses, but not a claim we can stand over |
 
-The liturgical content on `rite.html` — the order of the rite, the readings, the
-music, the canonical and civil preparation — is written from the *Order of
-Celebrating Matrimony* and current Irish practice, and is intended to be
-accurate. It is still a plain-language summary, not canon law, and the page says
+The liturgical content on `rite.html` — both orders of the rite, the readings,
+the music, the canonical and civil preparation — is written from the *Order of
+Celebrating Matrimony*, the 1962 *Rituale Romanum* and *Missale Romanum*, and
+current Irish practice, and is intended to be accurate. The Traditional Latin
+Mass section covers the marriage rite, the propers of the *Missa pro Sponso et
+Sponsa*, the nuptial blessing after the Pater Noster, and the fact that
+permission for the older rite rests with the diocesan bishop under
+*Traditionis custodes*. It is still a plain-language summary, not canon law, and the page says
 so. Have your own celebrant read it before you publish, particularly the
 paperwork section, since dioceses differ in detail.
 
@@ -148,7 +152,7 @@ Six pages, all plain HTML:
 |---|---|
 | `index.html` | Home |
 | `philosophy.html` | What the house believes, the people, the history |
-| `rite.html` | The Order of Celebrating Matrimony, readings, music, paperwork |
+| `rite.html` | Both rites — the Order of Celebrating Matrimony and the Traditional Latin nuptial Mass — plus readings, music, paperwork |
 | `atelier.html` | Collections, investment, the eight-step process |
 | `weddings.html` | Portfolio, with filters |
 | `contact.html` | Enquiry form and FAQ |
@@ -195,6 +199,11 @@ initialising by hand; add the attribute and it works.
 | `data-native-scroll` | Marks a subtree that should keep the browser's own scrolling rather than the inertial scroller. |
 | `data-tilt="6"` | Slight 3-D tilt toward the cursor. |
 | `data-year` | Replaced with the current year. |
+
+`window.Altare.refresh()` re-reads the document and rebinds all of the above.
+Call it after swapping content in — client-side navigation, a CMS render,
+injected markup — and the splits, entrances, parallax, pins and generated
+artwork pick up the new nodes.
 
 **Scrolling.** The site uses an inertial scroller that lerps toward a target and
 drives the real `scrollTop`, so `position: sticky`, anchor links, find-in-page
@@ -243,6 +252,12 @@ wash behind. Options: `petals`, `inner`, `color`, `lineWidth`, `glass`.
 
 **`gildGrain`** — the gesso tooth laid over the whole document as a tiled SVG
 turbulence, wired to the `--grain-src` custom property. Runs automatically.
+
+**Painting is lazy.** A `fresco` is not painted until its canvas comes within
+400px of the viewport, and it is then painted a band of rows at a time with a
+7ms budget per frame, fading in when it completes. A panel nobody scrolls to is
+never painted at all. Doing it in one pass — as the first cut did — is roughly a
+quarter-second of blocked main thread per panel.
 
 All of it pauses when off-screen and switches off entirely under reduced-motion.
 

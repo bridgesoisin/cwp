@@ -338,8 +338,12 @@ p:last-child { margin-bottom: 0; }
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   z-index: 0;
-  opacity: 0.9;
+  opacity: 0;
+  transition: opacity 1.1s var(--ease-out);
 }
+/* Plates are painted in slices once the panel nears the viewport; fade each
+   one in as it finishes rather than letting it pop. */
+.fresco.is-painted { opacity: 0.9; }
 .fresco--soft { filter: blur(18px) saturate(1.15); transform: scale(1.18); }
 
 .plate {
