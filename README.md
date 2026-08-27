@@ -1,4 +1,5 @@
-# Ad Altare — Catholic Wedding Atelier
+# Ad Altare
+# Catholic Wedding Atelier
 
 A static marketing site for a Catholic wedding planning company in Ireland.
 Six pages, no build step, no dependencies. Open `index.html` and it runs.
