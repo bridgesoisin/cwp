@@ -235,7 +235,8 @@ NAV_ITEMS = [
 ]
 
 MENU_ITEMS = ([("Home", "index.html")] + NAV_ITEMS +
-              [("Budget Guide", "budget.html"), ("Contact", "contact.html")])
+              [("Budget Guide", "budget.html"), ("The Journal", "journal.html"),
+               ("Contact", "contact.html")])
 
 
 def brand_block(sub=True):
@@ -316,6 +317,7 @@ FOOTER = """
             <li><a href="atelier.html">Services &amp; Investment</a></li>
             <li><a href="weddings.html">Weddings</a></li>
             <li><a href="budget.html">The Budget Guide</a></li>
+            <li><a href="journal.html">The Journal</a></li>
           </ul>
         </div>
 
@@ -448,6 +450,10 @@ ORGANISATION = {
 }
 
 
+def og_abs_for(page):
+    return "%s/assets/images/og/%s.jpg" % (SITE_URL, page.replace(".html", ""))
+
+
 def structured_data(page, body_html, title, description):
     """One @graph per page: the business, this page, its trail, and whatever
     the page's own markup supports."""
@@ -471,6 +477,20 @@ def structured_data(page, body_html, title, description):
                 {"@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL + "/"},
                 {"@type": "ListItem", "position": 2, "name": title, "item": url},
             ],
+        })
+
+    if page.startswith("journal-"):
+        graph.append({
+            "@type": "Article",
+            "@id": url + "#article",
+            "headline": title,
+            "description": description,
+            "inLanguage": "en-IE",
+            "isAccessibleForFree": True,
+            "publisher": {"@id": SITE_URL + "/#organisation"},
+            "author": {"@id": SITE_URL + "/#organisation"},
+            "mainEntityOfPage": {"@id": url + "#page"},
+            "image": og_abs_for(page),
         })
 
     faqs = faq_entities(body_html)

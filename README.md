@@ -104,7 +104,8 @@ of it should go live unchanged. Search for each string and replace it.
 | Every couple and wedding in the portfolio | `weddings.html`, `index.html` | invented couples. **The churches are real buildings; the weddings are not.** Three are tagged `tlm` and shown as traditional-rite weddings |
 | Prices (€2,400 / €9,800 / €3,600 and the add-ons) | `atelier.html` | invented |
 | Every figure in the cost table and the twelve levers | `budget.html` | **indicative Irish figures, not quotations** — check them against current local prices before launch |
-| Irish terminology — the green book, corkage practice, the marriage course | `budget.html`, `rite.html` | written as the source guide has it; outbound network was blocked, so nothing could be checked against a current source |
+| Irish terminology — the green book, corkage practice, the marriage course | `budget.html`, `rite.html`, `journal-paperwork.html` | written as the source guide has it; outbound network was blocked, so nothing could be checked against a current source |
+| Everything about permissions for the older rite | `rite.html`, `journal-latin-mass.html` | accurate as far as it goes, but diocesan practice varies and changes — have a priest read it |
 | Dioceses served | `philosophy.html` | real Irish dioceses, but not a claim we can stand over |
 
 The liturgical content on `rite.html` — both orders of the rite, the readings,
@@ -212,6 +213,12 @@ time, and the generated `.html` is what ships. See `tools/README.md`.
 **Editing one page's copy?** Edit `tools/bodies/<page>.html`, then
 `python3 tools/build.py`.
 
+**Adding a journal article?** Copy `tools/bodies/journal-paperwork.html` as a
+starting point, register it in `tools/build.py` with a title and description,
+add a card to `tools/bodies/journal.html`, add an entry to `tools/mk_og.js`, and
+rebuild. Any page whose filename starts with `journal-` automatically gets
+`Article` structured data.
+
 ## Being found and shared
 
 - `sitemap.xml` and `robots.txt`, generated from the page list.
@@ -242,6 +249,9 @@ Six pages, all plain HTML:
 | `weddings.html` | Portfolio, with filters |
 | `budget.html` | What a wedding costs, twelve ways to spend less, and a countdown |
 | `contact.html` | Enquiry form and FAQ |
+| `journal.html` | Index of the written guides |
+| `journal-latin-mass.html` | Arranging a Traditional Latin nuptial Mass in Ireland |
+| `journal-paperwork.html` | The church file, the State file, and the order to do them in |
 | `privacy.html` | What happens to enquiry data — GDPR notice |
 
 **The header, mobile menu and footer are duplicated in all six files.** That is

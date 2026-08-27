@@ -42,6 +42,20 @@ PAGES = [
     dict(file="contact.html", nav="contact.html", title="Contact",
          desc="Begin an enquiry with Ad Altare. Tell us your date, your church "
               "and your guest count, and we will write back within two working days."),
+    dict(file="journal.html", nav="journal.html", title="The Journal",
+         desc="Practical writing on planning a Catholic wedding in Ireland — "
+              "what it costs, how to arrange a Traditional Latin nuptial Mass, "
+              "and the paperwork in the order you actually need it."),
+    dict(file="journal-latin-mass.html", nav="journal.html",
+         title="Arranging a Traditional Latin nuptial Mass in Ireland",
+         desc="Start with the celebrant, not the church. What permission is "
+              "required since Traditionis custodes, what differs on the day, "
+              "and how to keep your guests with you throughout."),
+    dict(file="journal-paperwork.html", nav="journal.html",
+         title="The paperwork, in the order you actually need it",
+         desc="The church file and the State file, what each wants, and the "
+              "order to do it in — including the three-month notice that is "
+              "the only hard legal deadline."),
     dict(file="privacy.html", nav="privacy.html", title="Privacy",
          desc="What Ad Altare does with the details you send through the "
               "enquiry form: why we hold them, for how long, who else sees "
