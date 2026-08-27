@@ -10,6 +10,9 @@ they drift apart.
 ```sh
 python3 tools/build.py          # regenerate every page from tools/bodies/*.html
 python3 tools/mk_weddings.py    # regenerate tools/bodies/weddings.html from its data
+python3 tools/mk_meta.py        # regenerate sitemap.xml and robots.txt
+node    tools/mk_og.js          # re-render the share images (needs Playwright)
+BUNDLE_OUT=preview.html python3 tools/bundle.py   # one-file preview of the whole site
 ```
 
 | File | What it holds |
@@ -18,6 +21,9 @@ python3 tools/mk_weddings.py    # regenerate tools/bodies/weddings.html from its
 | `build.py` | page list with titles and meta descriptions; wraps each body in the chrome |
 | `bodies/*.html` | the `<main>` content of each page — this is where you edit copy |
 | `mk_weddings.py` | the portfolio list; regenerates `bodies/weddings.html` |
+| `mk_meta.py` | `sitemap.xml` and `robots.txt`, from the same page list |
+| `mk_og.js`, `og-template.html` | the 1200×630 share images, drawn by the site's own art engine |
+| `bundle.py` | inlines every page into one self-contained file, for previewing |
 
 Bodies may use `{{icon:name}}`, `{{icon:name|class}}`, `{{email}}`, `{{phone}}`,
 `{{phone_href}}`, `{{brand}}`, `{{brand_caps}}`, `{{motto_la}}`, `{{motto_en}}`.
