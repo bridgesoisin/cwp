@@ -253,11 +253,24 @@ wash behind. Options: `petals`, `inner`, `color`, `lineWidth`, `glass`.
 **`gildGrain`** — the gesso tooth laid over the whole document as a tiled SVG
 turbulence, wired to the `--grain-src` custom property. Runs automatically.
 
-**Painting is lazy.** A `fresco` is not painted until its canvas comes within
-400px of the viewport, and it is then painted a band of rows at a time with a
-7ms budget per frame, fading in when it completes. A panel nobody scrolls to is
-never painted at all. Doing it in one pass — as the first cut did — is roughly a
-quarter-second of blocked main thread per panel.
+**Painting is lazy, and cheap to keep on screen.** Three things matter here,
+and each was a real stall before it was fixed:
+
+- A `fresco` is not painted until its canvas comes within 400px of the
+  viewport. A panel nobody scrolls to is never painted at all.
+- Painting is sliced: a band of rows at a time, against a **single global**
+  7ms-per-frame budget shared by every panel on the page, with the band size
+  adapting to the machine. The budget has to be global — a gallery where nine
+  plates enter together would otherwise start nine loops, each claiming its
+  own slice of every frame.
+- The drift animation redraws at 12fps, not 60, into a backing store capped at
+  900px. The source plate is only ~250px and is upscaled with smoothing, so a
+  full-resolution 60fps redraw costs a great deal and shows nothing. Before
+  this, ten panels redrawing two scaled composites each frame saturated the
+  main thread outright.
+
+`window.Altare.refresh(root)` re-mounts artwork in a subtree, and a canvas that
+was mounted while hidden repaints when it is shown again.
 
 All of it pauses when off-screen and switches off entirely under reduced-motion.
 

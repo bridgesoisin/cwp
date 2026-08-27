@@ -200,21 +200,60 @@
     };
   }
 
-  /* Work through a queue of painters, spending at most `budget` ms per frame
-     and handing the thread back in between. */
-  function paintQueue(painters, budget, onDone) {
-    function slice() {
-      var t0 = (global.performance || Date).now();
-      while (painters.length && (global.performance || Date).now() - t0 < budget) {
-        if (painters[0].step(6)) {
-          painters[0].commit();
-          painters.shift();
-        }
-      }
-      if (painters.length) global.requestAnimationFrame(slice);
-      else onDone();
-    }
+  /* One scheduler for every panel on the page.
+     The budget has to be global, not per panel: a gallery where nine plates
+     enter the viewport together would otherwise start nine independent loops,
+     each claiming its own slice of every frame, and between them starve
+     rendering, input and any pending timer. */
+  var PAINT_BUDGET_MS = 7;
+  var paintJobs = [], painting = false;
+  var clock = global.performance && global.performance.now
+    ? function () { return global.performance.now(); }
+    : function () { return Date.now(); };
+
+  function paintQueue(painters, onDone) {
+    paintJobs.push({ painters: painters, onDone: onDone });
+    if (painting) return;
+    painting = true;
     global.requestAnimationFrame(slice);
+  }
+
+  /* Rows painted per step, adapted to the machine. The budget can only be
+     checked between steps, so a step that is too large blows straight through
+     it — which is how a fast desktop and a slow phone end up needing very
+     different numbers. Start cautious and converge on ~3ms per step. */
+  var rowStep = 4;
+
+  function slice() {
+    var t0 = clock();
+    var finished = [];
+
+    while (paintJobs.length && clock() - t0 < PAINT_BUDGET_MS) {
+      var job = paintJobs[0];
+      var s0 = clock();
+      var complete = job.painters[0].step(rowStep);
+      var took = clock() - s0;
+
+      /* Converge gently; a single slow frame should not collapse the step. */
+      var ideal = rowStep * 3 / Math.max(0.25, took);
+      rowStep = Math.max(1, Math.min(32, Math.round(rowStep * 0.7 + ideal * 0.3)));
+
+      if (complete) {
+        job.painters[0].commit();
+        job.painters.shift();
+      }
+      if (!job.painters.length) {
+        paintJobs.shift();
+        finished.push(job.onDone);
+      }
+    }
+
+    /* Callbacks run after the budget check so a slow one cannot push this
+       frame over, and outside the loop so onDone can enqueue more work. */
+    for (var i = 0; i < finished.length; i++) finished[i]();
+
+    if (paintJobs.length) global.requestAnimationFrame(slice);
+    else painting = false;
   }
 
   /* Named looks. Markup asks for one by name and overrides what it likes:
@@ -278,7 +317,7 @@
         glow: opts.glow * 0.45
       }));
 
-      paintQueue([a, b], 7, function () {
+      paintQueue([a, b], function () {
         plateA = a.canvas;
         plateB = b.canvas;
         prepared = true;
@@ -286,11 +325,17 @@
       });
     }
 
+    /* The plate this is drawn from is only a few hundred pixels wide and is
+       upscaled with smoothing, so backing the canvas at full device
+       resolution costs a great deal and shows nothing. */
+    var MAX_BACKING = 900;
+
     function size() {
       var r = canvas.getBoundingClientRect();
       var dpr = Math.min(global.devicePixelRatio || 1, 1.5);
       var w = Math.max(1, Math.round(r.width * dpr));
       var h = Math.max(1, Math.round(r.height * dpr));
+      if (w > MAX_BACKING) { h = Math.round(h * MAX_BACKING / w); w = MAX_BACKING; }
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w; canvas.height = h;
       }
@@ -301,7 +346,7 @@
       if (!w || !h || !prepared) return;
       ctx.clearRect(0, 0, w, h);
       ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
+      ctx.imageSmoothingQuality = 'medium';
 
       var ax = Math.sin(t * 0.00021) * w * 0.05 * opts.drift;
       var ay = Math.cos(t * 0.00017) * h * 0.05 * opts.drift;
@@ -319,15 +364,20 @@
       ctx.globalAlpha = 1;
     }
 
+    var DRIFT_INTERVAL = 1000 / 12;   /* the wander is slow; 12fps reads the same */
+    var lastDraw = 0;
+
     function loop(now) {
       raf = global.requestAnimationFrame(loop);
-      if (!visible) return;
+      if (!visible || now - lastDraw < DRIFT_INTERVAL) return;
+      lastDraw = now;
       t = now;
       draw();
     }
 
     function activate() {
       if (prepared || pending) return;
+      if (!canvas.getClientRects().length) return;   /* still not laid out */
       pending = true;
       idle(function () {
         prepare(function () {
@@ -576,9 +626,15 @@
     root = root || document;
 
     Array.prototype.forEach.call(root.querySelectorAll('[data-fresco]'), function (el) {
-      if (el.dataset.frescoMounted) return;
+      /* Already mounted: nudge it instead. A canvas mounted while its subtree
+         was display:none never gets an intersection callback, so re-entering
+         the document has to ask it to paint. activate() is idempotent. */
+      if (el.dataset.frescoMounted) {
+        if (el.__fresco && el.__fresco.paint) el.__fresco.paint();
+        return;
+      }
       el.dataset.frescoMounted = '1';
-      fresco(el, parse(el, 'data-fresco'));
+      el.__fresco = fresco(el, parse(el, 'data-fresco'));
     });
 
     Array.prototype.forEach.call(root.querySelectorAll('[data-rose]'), function (el) {

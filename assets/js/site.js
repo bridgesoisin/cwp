@@ -27,6 +27,14 @@
 
   var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
   var lerp = function (a, b, t) { return a + (b - a) * t; };
+
+  /* Frame-rate independent easing. A fixed per-frame factor moves twice as
+     fast on a 120Hz display as on a 60Hz one, and crawls when frames are
+     slow; this converts the factor into one scaled by elapsed time. */
+  var FRAME = 1000 / 60;
+  function ease(factor, dt) {
+    return 1 - Math.pow(1 - factor, Math.min(4, (dt || FRAME) / FRAME));
+  }
   var qsa = function (sel, ctx) {
     return Array.prototype.slice.call((ctx || doc).querySelectorAll(sel));
   };
@@ -48,7 +56,7 @@
   var Scroller = (function () {
     var target = 0, current = 0, running = false, raf = 0;
     var lastSet = -1, enabled = false;
-    var velocity = 0;
+    var velocity = 0, lastT = 0;
 
     function maxY() {
       return Math.max(0, root.scrollHeight - window.innerHeight);
@@ -57,12 +65,15 @@
     function start() {
       if (running) return;
       running = true;
+      lastT = 0;
       raf = requestAnimationFrame(tick);
     }
 
-    function tick() {
+    function tick(now) {
+      var dt = lastT ? now - lastT : FRAME;
+      lastT = now;
       var prev = current;
-      current = lerp(current, target, 0.115);
+      current = lerp(current, target, ease(0.115, dt));
       velocity = current - prev;
 
       if (Math.abs(target - current) < 0.35) {
@@ -386,9 +397,16 @@
       });
     }
 
-    function refresh() {
-      items = qsa('[data-split]');
-      items.forEach(build);
+    /* `root` limits the rebuild to one subtree. Splitting re-writes innerHTML
+       and then measures every word's offsetTop, which forces layout — doing it
+       for the whole document when only one section changed is wasteful. */
+    function refresh(root) {
+      var found = qsa('[data-split]', root || doc);
+      found.forEach(build);
+      if (!root) items = found;
+      else found.forEach(function (el) {
+        if (items.indexOf(el) === -1) items.push(el);
+      });
     }
 
     function init() {
@@ -452,12 +470,15 @@
    * ====================================================================== */
 
   var Cursor = (function () {
-    var el, ring, label, x = 0, y = 0, rx = 0, ry = 0, raf = 0;
+    var el, ring, label, x = 0, y = 0, rx = 0, ry = 0, raf = 0, lastT = 0;
 
-    function loop() {
+    function loop(now) {
       raf = requestAnimationFrame(loop);
-      rx = lerp(rx, x, 0.19);
-      ry = lerp(ry, y, 0.19);
+      var dt = lastT ? now - lastT : FRAME;
+      lastT = now;
+      var k = ease(0.19, dt);
+      rx = lerp(rx, x, k);
+      ry = lerp(ry, y, k);
       el.style.transform = 'translate3d(' + rx.toFixed(2) + 'px,' + ry.toFixed(2) + 'px,0)';
     }
 
@@ -899,28 +920,41 @@
       count = el.querySelector('.loader__count');
       body.classList.add('is-locked');
 
-      var p = 0, done = false, loaded = false;
+      var p = 0, done = false, loaded = false, lastT = 0;
+      var started = (window.performance || Date).now();
       window.addEventListener('load', function () { loaded = true; });
       /* Never hold the counter at 88 waiting on a slow or failed asset. */
       setTimeout(function () { loaded = true; }, 1100);
 
-      function frame() {
-        /* Climb quickly to 88, then wait on the real load event. */
+      function close() {
+        if (done) return;
+        done = true;
+        if (count) count.textContent = '100';
+        if (meter) meter.style.transform = 'scaleX(1)';
+        setTimeout(function () { finish(cb); }, 260);
+      }
+
+      function frame(now) {
+        var dt = lastT ? now - lastT : FRAME;
+        lastT = now;
+
+        /* Climb quickly to 88, then wait on the real load event. Progress is
+           driven by elapsed time, not by frame count, so the preloader takes
+           the same wall-clock time whether frames are arriving at 120Hz or
+           the main thread is busy painting. */
         var ceiling = loaded ? 100 : 88;
-        p = Math.min(ceiling, p + (ceiling - p) * 0.09 + 1.3);
+        p = Math.min(ceiling, p + (ceiling - p) * ease(0.09, dt) + 1.3 * (dt / FRAME));
         if (meter) meter.style.transform = 'scaleX(' + (p / 100).toFixed(3) + ')';
         if (count) count.textContent = String(Math.floor(p)).padStart(3, '0');
-        if (p >= 99.4 && !done) {
-          done = true;
-          if (count) count.textContent = '100';
-          setTimeout(function () { finish(cb); }, 260);
-          return;
-        }
+
+        if (p >= 99.4) { close(); return; }
         requestAnimationFrame(frame);
       }
       requestAnimationFrame(frame);
 
-      /* Never let a slow asset hold the door shut. */
+      /* Hard wall-clock ceilings, so the door never sticks: one for a slow
+         load event, one for a page whose frames have stopped entirely. */
+      setTimeout(close, 2600);
       setTimeout(function () { if (!done) { done = true; finish(cb); } }, 4000);
     }
 
@@ -1010,9 +1044,9 @@
   window.Altare = {
     Scroller: Scroller,
     ScrollFX: ScrollFX,
-    refresh: function () {
-      if (window.AltareArt) window.AltareArt.mount();
-      Split.refresh();
+    refresh: function (root) {
+      if (window.AltareArt) window.AltareArt.mount(root);
+      Split.refresh(root);
       ScrollFX.refresh();
       Reveal.init();
     }
