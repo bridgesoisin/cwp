@@ -1,0 +1,14 @@
+# Generated single-file preview bundles.
+#
+# The site is six separate HTML files; the bundle inlines all of them plus the
+# CSS and JS into one document for previewing. It is build output, it goes
+# stale against the real pages the moment either changes, and GitHub Pages
+# would exclude a leading-underscore file from the published site anyway.
+_preview*.html
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
